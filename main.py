@@ -16,6 +16,7 @@ def main():
     # Check for random flow generation flag
     use_random_flows = False
     random_flow_count = 0
+    output_json_file = None
     
     # Process command line arguments
     config_file = 'network_config.json'
@@ -28,9 +29,20 @@ def main():
             else:
                 # Prompt user for flow count if not provided
                 random_flow_count = int(input("Enter the number of random flows to generate: "))
+        elif arg == '--output':
+            # Check if next argument is the output file name
+            if i < len(sys.argv) - 1:
+                output_json_file = sys.argv[i+1]
+            else:
+                # Default output file name
+                output_json_file = 'simulation_results.json'
         elif not arg.startswith('--') and i == 1:
             # First non-flag argument is the config file
             config_file = arg
+    
+    # If no output file specified but user wants JSON output, set a default
+    if output_json_file is None:
+        output_json_file = 'simulation_results.json'
     
     # Load configuration from JSON file
     try:
@@ -116,12 +128,16 @@ def main():
                 nodes[node_id].set_queuing_delay(delay)
         
         admitted_flows = set()
+        flow_paths = {}
+        flow_shaping_parameters = {}
         
         # Set up flow paths and routing entries
         for (flow, path, shaping_parameter), z in best_solution.items():
             if z == 1: 
                 flow_id = flow.flow_id
                 admitted_flows.add(flow_id)
+                flow_paths[flow_id] = path
+                flow_shaping_parameters[flow_id] = shaping_parameter
                 
                 # Set the flow path in the source node (which is the ingress node for this flow)
                 source_node = nodes[flow.src]
@@ -140,6 +156,41 @@ def main():
             # For each edge, have both nodes learn mappings from the other node
             nodes[node1].learn_mappings(node2, in_port=node2)
             nodes[node2].learn_mappings(node1, in_port=node1)
+        
+        # Prepare data for JSON output
+        simulation_results = {
+            "simulation_parameters": {
+                "cycle_duration_T": cycle_duration_T
+            },
+            "network": {
+                "nodes": network_config["nodes"],
+                "links": network_config["links"],
+                "queuing_delays": {str(node): delay for node, delay in queuing_delays.items()}
+            },
+            "flows": [
+                {
+                    "flow_id": flow.flow_id,
+                    "arrival_rate": flow.arrival_rate,
+                    "burst_size": flow.burst_size,
+                    "max_e2e_delay": flow.max_e2e_delay,
+                    "max_pkt_size": flow.max_pkt_size,
+                    "src": flow.src,
+                    "dest": flow.dest,
+                    "admitted": flow.flow_id in admitted_flows,
+                    "path": flow_paths.get(flow.flow_id, []),
+                    "shaping_parameter": flow_shaping_parameters.get(flow.flow_id, None)
+                }
+                for flow in flows
+            ],
+            "admitted_flows_count": len(admitted_flows),
+            "total_flows_count": len(flows)
+        }
+        
+        # Write results to JSON file
+        with open(output_json_file, 'w') as f:
+            json.dump(simulation_results, f, indent=2)
+        
+        print(f"\nSimulation results have been saved to {output_json_file}")
         
         # Start all nodes in separate threads
         threads = {}
@@ -192,13 +243,39 @@ def main():
             
             if flows_completed:
                 print("\nAll flows have completed processing. Simulation successful!")
+                
+                # Update completion status in the JSON file
+                simulation_results["simulation_complete"] = True
+                simulation_results["completion_status"] = {
+                    str(flow_id): completed for flow_id, completed in flow_completion_status.items()
+                }
+                with open(output_json_file, 'w') as f:
+                    json.dump(simulation_results, f, indent=2)
+                print(f"Updated simulation results with completion status in {output_json_file}")
             else:
                 print(f"\nTimeout reached after {timeout_seconds} seconds. Some flows did not complete:")
+                incomplete_flows = []
                 for flow_id, completed in flow_completion_status.items():
                     if not completed:
                         print(f"- Flow {flow_id} did not complete")
+                        incomplete_flows.append(flow_id)
+                
+                # Update timeout status in the JSON file
+                simulation_results["simulation_complete"] = False
+                simulation_results["timeout_reached"] = True
+                simulation_results["incomplete_flows"] = incomplete_flows
+                with open(output_json_file, 'w') as f:
+                    json.dump(simulation_results, f, indent=2)
+                print(f"Updated simulation results with timeout information in {output_json_file}")
         except KeyboardInterrupt:
             print("Stopping the nodes early due to keyboard interrupt.")
+            
+            # Update keyboard interrupt status in the JSON file
+            simulation_results["simulation_complete"] = False
+            simulation_results["keyboard_interrupt"] = True
+            with open(output_json_file, 'w') as f:
+                json.dump(simulation_results, f, indent=2)
+            print(f"Updated simulation results with interruption information in {output_json_file}")
     
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_file}' not found.")

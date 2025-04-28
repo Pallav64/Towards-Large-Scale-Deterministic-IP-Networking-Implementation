@@ -47,6 +47,69 @@ python main.py custom_network.json --random 3
 
 When using random flow generation, the network topology and other settings are still loaded from the configuration file, but the flows are randomly generated instead of loaded from the file.
 
+### JSON Output
+
+The simulation can output results to a JSON file for further analysis or visualization:
+
+```bash
+# Save results to a specified JSON file
+python main.py --output results.json
+
+# Combine with random flow generation
+python main.py --random 5 --output results.json
+
+# Use custom config and specify output file
+python main.py custom_network.json --output results.json
+```
+
+If no output file is specified but the `--output` flag is used, results will be saved to `simulation_results.json` by default.
+
+#### JSON Output Structure
+
+The output JSON file contains comprehensive information about the simulation:
+
+```json
+{
+  "simulation_parameters": {
+    "cycle_duration_T": 10
+  },
+  "network": {
+    "nodes": [1, 2, 3, 4],
+    "links": [...],
+    "queuing_delays": {...}
+  },
+  "flows": [
+    {
+      "flow_id": 1,
+      "arrival_rate": 10,
+      "burst_size": 7.5,
+      "max_e2e_delay": 50,
+      "max_pkt_size": 1.5,
+      "src": 1,
+      "dest": 4,
+      "admitted": true,
+      "path": [1, 2, 4],
+      "shaping_parameter": 3.75
+    },
+    ...
+  ],
+  "admitted_flows_count": 2,
+  "total_flows_count": 3,
+  "simulation_complete": true,
+  "completion_status": {
+    "1": true,
+    "2": true
+  }
+}
+```
+
+The JSON file is updated at multiple points during the simulation:
+
+- Initially after flow admission decisions are made
+- When all flows complete successfully
+- If there's a timeout with some incomplete flows
+- If the simulation is interrupted with keyboard interrupt
+
 ## JSON Configuration Format
 
 ### Example Configuration
