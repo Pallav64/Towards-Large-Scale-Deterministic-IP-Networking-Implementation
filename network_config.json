@@ -1,0 +1,60 @@
+{
+  "simulation_parameters": {
+    "cycle_duration_T": 10
+  },
+  "network": {
+    "nodes": [1, 2, 3, 4],
+    "links": [
+      {
+        "node1": 1,
+        "node2": 2,
+        "delay": 1.0,
+        "bandwidth": 100
+      },
+      {
+        "node1": 2,
+        "node2": 3,
+        "delay": 1.5,
+        "bandwidth": 100
+      },
+      {
+        "node1": 2,
+        "node2": 4,
+        "delay": 1.5,
+        "bandwidth": 100
+      },
+      {
+        "node1": 3,
+        "node2": 4,
+        "delay": 1.5,
+        "bandwidth": 100
+      }
+    ],
+    "queuing_delays": {
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.0,
+      "4": 0.0
+    }
+  },
+  "flows": [
+    {
+      "flow_id": 1,
+      "arrival_rate": 10,
+      "burst_size": 7.5,
+      "max_e2e_delay": 50,
+      "max_pkt_size": 1.5,
+      "src": 1,
+      "dest": 4
+    },
+    {
+      "flow_id": 2,
+      "arrival_rate": 5,
+      "burst_size": 4.5,
+      "max_e2e_delay": 50,
+      "max_pkt_size": 1.5,
+      "src": 3,
+      "dest": 1
+    }
+  ]
+}
