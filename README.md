@@ -47,6 +47,16 @@ python main.py custom_network.json --random 3
 
 When using random flow generation, the network topology and other settings are still loaded from the configuration file, but the flows are randomly generated instead of loaded from the file.
 
+### Dynamic Tau (τ) Calculation
+
+The simulation dynamically calculates tau values based on network topology and propagation delays according to the formulas from the paper. This accurately models the real waiting time between reception and transmission at each node.
+
+For each pair of nodes, the tau value is calculated as:
+
+- Reception end time = Propagation delay + T
+- Next cycle start time = ⌈Reception end time / T⌉ × T
+- tau = Next cycle start time - Reception end time
+
 ### JSON Output
 
 The simulation can output results to a JSON file for further analysis or visualization:
@@ -75,8 +85,7 @@ The output JSON file contains comprehensive information about the simulation:
   },
   "network": {
     "nodes": [1, 2, 3, 4],
-    "links": [...],
-    "queuing_delays": {...}
+    "links": [...]
   },
   "flows": [
     {
@@ -129,13 +138,7 @@ The JSON file is updated at multiple points during the simulation:
         "bandwidth": 100
       },
       ...
-    ],
-    "queuing_delays": {
-      "1": 0.5,
-      "2": 1.0,
-      "3": 0.8,
-      "4": 0.7
-    }
+    ]
   },
   "flows": [
     {
@@ -166,8 +169,6 @@ The JSON file is updated at multiple points during the simulation:
   - `node2`: Second node ID in the undirected link
   - `delay`: Propagation delay in milliseconds
   - `bandwidth`: Bandwidth in Mbps
-- `queuing_delays`: Dictionary mapping node IDs to their queuing delays in milliseconds
-  - Each node ID is assigned a specific queuing delay value
 
 #### Flows
 

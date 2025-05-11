@@ -34,13 +34,7 @@
         "delay": 1.5,
         "bandwidth": 100
       }
-    ],
-    "queuing_delays": {
-      "1": 0.0,
-      "2": 0.0,
-      "3": 0.0,
-      "4": 0.0
-    }
+    ]
   },
   "flows": [
     {
@@ -57,7 +51,7 @@
         2,
         4
       ],
-      "shaping_parameter": 7.5
+      "shaping_parameter": 1.5
     },
     {
       "flow_id": 2,
@@ -73,7 +67,7 @@
         2,
         1
       ],
-      "shaping_parameter": 3.0
+      "shaping_parameter": 1.5
     }
   ],
   "admitted_flows_count": 2,

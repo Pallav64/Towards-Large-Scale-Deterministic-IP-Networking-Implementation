@@ -14,7 +14,7 @@ class CoreNode:
         self.lock = threading.Lock()
         self.mapping_table = {} # Mapping table: maps (in_port, in_label) to (out_port, out_label)
         self.link_delays = {}  # Store delays for each link to neighbors
-        self.queuing_delay = 0.0  # Default queuing delay (ms)
+        self.tau = 0.0  # τ value (ms)
         self.active_queue_index = 0   # Track active queue (0, 1, or 2) during each cycle
         self.connected_nodes = {}   # Connect to other nodes
         self.next_hop_map = {}      # Track which node is the next hop for each flow
@@ -39,9 +39,9 @@ class CoreNode:
     def set_link_delay(self, neighbor_node, delay):
         self.link_delays[neighbor_node] = delay
 
-    def set_queuing_delay(self, delay):
-        """Set the queuing delay for this node."""
-        self.queuing_delay = delay
+    def set_tau(self, tau):
+        """Set the τ value for this node in milliseconds."""
+        self.tau = tau
 
     def connect_to_node(self, node_id, node):
         self.connected_nodes[node_id] = node

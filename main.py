@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 from collections import deque
+import math
 
 # Import custom modules
 from models import Flow, generate_random_flows, display_flows
@@ -65,12 +66,8 @@ def main():
                 bandwidth=link['bandwidth']
             )
         
-        # Extract queuing delays if available
-        queuing_delays = {}
-        if 'queuing_delays' in network_config:
-            for node_id, delay in network_config['queuing_delays'].items():
-                queuing_delays[int(node_id)] = delay
-        
+        tau = network.calculate_tau_values(cycle_duration_T)
+                
         # Either load flows from config or generate random flows
         if use_random_flows:
             flows = generate_random_flows(random_flow_count, network_config['nodes'])
@@ -94,7 +91,7 @@ def main():
         display_flows(flows)
         
         # Run the CGRR algorithm to find the best solution
-        best_solution = cgrr_algorithm(network, flows, cycle_duration_T, queuing_delays)
+        best_solution = cgrr_algorithm(network, flows, cycle_duration_T, tau)
         
         # Dictionary to store all nodes (both ingress and core)
         nodes = {}
@@ -122,10 +119,10 @@ def main():
             if isinstance(nodes[node2], CoreNode):
                 nodes[node2].set_link_delay(node1, network.delays[(node1, node2)])
         
-        # Set queuing delays for each node
-        for node_id, delay in queuing_delays.items():
+        # Set tau values for each node
+        for node_id, node_tau in tau.items():
             if node_id in nodes:
-                nodes[node_id].set_queuing_delay(delay)
+                nodes[node_id].set_tau(node_tau)
         
         admitted_flows = set()
         flow_paths = {}
@@ -165,7 +162,6 @@ def main():
             "network": {
                 "nodes": network_config["nodes"],
                 "links": network_config["links"],
-                "queuing_delays": {str(node): delay for node, delay in queuing_delays.items()}
             },
             "flows": [
                 {

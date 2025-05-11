@@ -76,14 +76,16 @@ def solve_rmp(columns, network, cycle_duration_T):
     return solution, dual_vars
 
 
-def solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, queuing_delays):
+def solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, tau):
     """Solve the pricing problem to find the best path and shaping parameter for a flow."""
     best_path = None
     best_b_prime = None
     best_cost = float('inf')
     for b_prime in possible_shaping_parameters(flow, cycle_duration_T):
         shaping_delay = math.ceil(flow.burst_size / b_prime) * cycle_duration_T + cycle_duration_T
-        delay_constraint = flow.max_e2e_delay - shaping_delay
+        # Convert shaping_delay from μs to ms for consistency with other delays
+        shaping_delay_ms = shaping_delay / 1000.0
+        delay_constraint = flow.max_e2e_delay - shaping_delay_ms
         
         if delay_constraint < 0:
             continue  
@@ -91,11 +93,11 @@ def solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, queuing_de
         path = larac_algorithm(network.graph, flow.src, flow.dest, delay_constraint, dual_vars)
         
         if path:
-            # Calculate the actual path delay including propagation and queuing delays
-            path_delay = calculate_overall_delay(network, path, cycle_duration_T, queuing_delays)
+            # Calculate the actual path delay including propagation and tau values
+            path_delay = calculate_overall_delay(network, path, cycle_duration_T, tau)
             
             # Check if the total delay (shaping delay + path delay) satisfies the max E2E delay constraint
-            if shaping_delay + path_delay <= flow.max_e2e_delay:
+            if shaping_delay_ms + path_delay <= flow.max_e2e_delay:
                 cost = sum(dual_vars.get((u, v), 0) for u, v in zip(path[:-1], path[1:]))
                 if cost < best_cost:
                     best_path = path
@@ -105,12 +107,12 @@ def solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, queuing_de
     return best_path, best_b_prime
 
 
-def add_new_columns(columns, dual_vars, network, flows, cycle_duration_T, queuing_delays):
+def add_new_columns(columns, dual_vars, network, flows, cycle_duration_T, tau):
     """Add new columns to the RMP based on the pricing problem."""
     new_columns_added = False
     for flow in flows:
         # Solve the pricing problem to find the best path and shaping parameter
-        best_path, best_b_prime = solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, queuing_delays)
+        best_path, best_b_prime = solve_pricing_problem(flow, network, dual_vars, cycle_duration_T, tau)
         if best_path and best_b_prime:
             # Check if the new column improves the objective
             new_column = (flow, best_path, best_b_prime)
@@ -134,13 +136,13 @@ def calculate_objective(solution, flows):
     return sum(f.arrival_rate for (f, _, _), z in solution.items() if z == 1)
 
 
-def cgrr_algorithm(network, flows, cycle_duration_T, queuing_delays, max_rounding_steps=100):
+def cgrr_algorithm(network, flows, cycle_duration_T, tau, max_rounding_steps=100):
     """Column Generation with Randomized Rounding (CGRR) algorithm."""
     columns = []  # List of (flow, path, shaping_parameter) tuples
     dual_vars = {}  # Dual variables for capacity constraints
     while True:
         rmp_solution, dual_vars = solve_rmp(columns, network, cycle_duration_T)
-        if not add_new_columns(columns, dual_vars, network, flows, cycle_duration_T, queuing_delays):
+        if not add_new_columns(columns, dual_vars, network, flows, cycle_duration_T, tau):
             break  # Exit the loop if no new columns are added
     base_solution = {(f, p, b): z for (f, p, b), z in rmp_solution.items() if z == 1}
     best_solution = base_solution.copy()
