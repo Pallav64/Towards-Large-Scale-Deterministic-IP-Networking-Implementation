@@ -1,0 +1,212 @@
+{
+  "simulation_parameters": {
+    "cycle_duration_T": 10
+  },
+  "network": {
+    "nodes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "links": [
+      {
+        "node1": 1,
+        "node2": 2,
+        "delay": 1.0,
+        "bandwidth": 100
+      },
+      {
+        "node1": 2,
+        "node2": 3,
+        "delay": 1.5,
+        "bandwidth": 100
+      },
+      {
+        "node1": 2,
+        "node2": 4,
+        "delay": 1.5,
+        "bandwidth": 100
+      },
+      {
+        "node1": 3,
+        "node2": 4,
+        "delay": 1.5,
+        "bandwidth": 100
+      }
+    ]
+  },
+  "flows": [
+    {
+      "flow_id": 1,
+      "arrival_rate": 5.1765221757935285,
+      "burst_size": 7.602727176219527,
+      "max_e2e_delay": 55.938776190065305,
+      "max_pkt_size": 1.0861038823170752,
+      "src": 1,
+      "dest": 2,
+      "admitted": true,
+      "path": [
+        1,
+        2
+      ],
+      "shaping_parameter": 2.1722077646341504
+    },
+    {
+      "flow_id": 2,
+      "arrival_rate": 10.259334286561455,
+      "burst_size": 8.820238845658436,
+      "max_e2e_delay": 48.825612830867996,
+      "max_pkt_size": 1.1025298557073044,
+      "src": 4,
+      "dest": 3,
+      "admitted": true,
+      "path": [
+        4,
+        3
+      ],
+      "shaping_parameter": 2.205059711414609
+    },
+    {
+      "flow_id": 3,
+      "arrival_rate": 9.446645564728192,
+      "burst_size": 3.1178334864336676,
+      "max_e2e_delay": 53.09608174826246,
+      "max_pkt_size": 1.0392778288112225,
+      "src": 1,
+      "dest": 4,
+      "admitted": true,
+      "path": [
+        1,
+        2,
+        4
+      ],
+      "shaping_parameter": 1.0392778288112225
+    },
+    {
+      "flow_id": 4,
+      "arrival_rate": 10.571521402453682,
+      "burst_size": 7.718074928170215,
+      "max_e2e_delay": 67.66515191628008,
+      "max_pkt_size": 1.102582132595745,
+      "src": 3,
+      "dest": 1,
+      "admitted": true,
+      "path": [
+        3,
+        2,
+        1
+      ],
+      "shaping_parameter": 2.20516426519149
+    },
+    {
+      "flow_id": 5,
+      "arrival_rate": 10.473042476336152,
+      "burst_size": 6.474016768250028,
+      "max_e2e_delay": 36.83239599070963,
+      "max_pkt_size": 1.2948033536500057,
+      "src": 3,
+      "dest": 2,
+      "admitted": true,
+      "path": [
+        3,
+        2
+      ],
+      "shaping_parameter": 1.2948033536500057
+    },
+    {
+      "flow_id": 6,
+      "arrival_rate": 8.069431763914476,
+      "burst_size": 4.8008047683393835,
+      "max_e2e_delay": 66.07692217446845,
+      "max_pkt_size": 1.6002682561131278,
+      "src": 4,
+      "dest": 1,
+      "admitted": true,
+      "path": [
+        4,
+        2,
+        1
+      ],
+      "shaping_parameter": 1.6002682561131278
+    },
+    {
+      "flow_id": 7,
+      "arrival_rate": 12.139727809359405,
+      "burst_size": 6.079184102372561,
+      "max_e2e_delay": 51.51186705640892,
+      "max_pkt_size": 1.0131973503954268,
+      "src": 1,
+      "dest": 4,
+      "admitted": true,
+      "path": [
+        1,
+        2,
+        4
+      ],
+      "shaping_parameter": 2.0263947007908536
+    },
+    {
+      "flow_id": 8,
+      "arrival_rate": 7.88687005923395,
+      "burst_size": 7.315310246125442,
+      "max_e2e_delay": 45.284093231709264,
+      "max_pkt_size": 1.8288275615313605,
+      "src": 1,
+      "dest": 4,
+      "admitted": true,
+      "path": [
+        1,
+        2,
+        4
+      ],
+      "shaping_parameter": 1.8288275615313605
+    },
+    {
+      "flow_id": 9,
+      "arrival_rate": 9.171774997610017,
+      "burst_size": 14.154098180736256,
+      "max_e2e_delay": 64.97882169368404,
+      "max_pkt_size": 1.769262272592032,
+      "src": 4,
+      "dest": 1,
+      "admitted": true,
+      "path": [
+        4,
+        2,
+        1
+      ],
+      "shaping_parameter": 3.538524545184064
+    },
+    {
+      "flow_id": 10,
+      "arrival_rate": 12.503552375487937,
+      "burst_size": 7.436766606914789,
+      "max_e2e_delay": 30.955458308060265,
+      "max_pkt_size": 1.8591916517286973,
+      "src": 3,
+      "dest": 2,
+      "admitted": true,
+      "path": [
+        3,
+        2
+      ],
+      "shaping_parameter": 1.8591916517286973
+    }
+  ],
+  "admitted_flows_count": 10,
+  "total_flows_count": 10,
+  "simulation_complete": true,
+  "completion_status": {
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true,
+    "5": true,
+    "6": true,
+    "7": true,
+    "8": true,
+    "9": true,
+    "10": true
+  }
+}
